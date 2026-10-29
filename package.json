@@ -1,0 +1,13 @@
+{
+  "name": "roundwise-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx netlify-cli dev",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

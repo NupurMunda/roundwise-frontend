@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Roundwise</title>
+  <meta name="description" content="Pick a company and see the DSA, system design, AI and behavioral questions reported for it.">
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="/">Roundwise</a>
+      <button id="theme" class="btn small" type="button"></button>
+    </header>
+    <main id="home" class="wrap">
+      <div>
+        <h1>Which company are you preparing for?</h1>
+        <p class="muted lead">Search, or click a name in the web. Larger names have more reported questions.</p>
+      </div>
+      <div class="bar">
+        <input id="q" class="search" type="search" placeholder="Type a company, e.g. Google" autocomplete="off" aria-label="Search companies" disabled>
+        <button id="toggle" class="btn" type="button" hidden></button>
+      </div>
+      <div id="message"></div>
+      <div id="web" role="group" aria-label="Company web"><svg id="edges" aria-hidden="true"></svg></div>
+      <ul id="list"></ul>
+      <p id="none" class="empty" hidden>No company matches that name.</p>
+      <div class="legend">
+        <span>Size: questions reported</span>
+        <span>Line: a system design question asked at both companies</span>
+        <span>Hover to see a company's connections</span>
+      </div>
+    </main>
+    <footer class="footer"><a href="/sources">Sources and licenses</a></footer>
+  </div>
+  <script type="module" src="/js/home.js"></script>
+</body>
+</html>
