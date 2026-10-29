@@ -258,7 +258,7 @@ function profileCard(profile) {
 }
 
 function render(company) {
-  document.title = `${company.name} · Roundwise`;
+  document.title = `${company.name} · Lurivo`;
   const back = el('a', 'back', '← All companies');
   back.href = '/';
   root.replaceChildren(back, el('h1', null, company.name), profileCard(company.profile));

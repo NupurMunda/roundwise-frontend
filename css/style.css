@@ -40,6 +40,8 @@ p { margin: 0; }
 .lead { margin-top: 6px; }
 
 .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.brandbox { display: flex; flex-direction: column; line-height: 1.2; }
+.tagline { font-size: 12px; color: var(--muted); }
 .brand { font-weight: 700; font-size: 19px; letter-spacing: -.02em; text-decoration: none; }
 .footer { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); padding-top: 8px; }
 .note { font-size: 13px; color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px; }

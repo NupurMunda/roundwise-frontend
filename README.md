@@ -1,4 +1,8 @@
-# roundwise-frontend
+# Lurivo
+
+Interview intelligence, made simple.
+
+This is the `roundwise-frontend` repo.
 
 Plain HTML, CSS and JavaScript front end for [roundwise-backend](https://github.com/NupurMunda/roundwise-backend). No framework, no build step, no runtime dependencies. Deploys to Netlify.
 
