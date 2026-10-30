@@ -37,3 +37,9 @@ Tests: `npm test` (Node's built-in test runner, no dependencies).
 - The proxy allows only GET, only the paths in `ALLOWED_PATH`, and only the query params `q`, `page`, `limit`, `time_window`, `difficulty`, `topic`. It never returns upstream headers except `Retry-After`.
 - Static assets are cached for a week rather than a year, because file names have no content hash.
 - `.env` files are git-ignored; commit only `.env.example`.
+
+## Traffic
+
+- **Netlify dashboard → Logs → Functions → `api`**: one JSON line per call that reaches the proxy: `{"event":"api","path":"/api/v1/companies/google","status":200,"ms":41}`. CDN cache hits never reach the function, so these are cache misses, which is what loads the backend. Paths and statuses only; no IPs, keys or query values are logged.
+- **Netlify dashboard → Site overview / Analytics**: page views and bandwidth (server-side analytics is a paid Netlify add-on).
+- The page itself loads no tracking script; the CSP allows only `'self'` scripts.

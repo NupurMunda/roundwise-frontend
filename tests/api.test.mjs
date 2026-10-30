@@ -22,6 +22,24 @@ afterEach(() => {
 
 const get = (path, context = { ip: '198.51.100.9' }) => handler(new Request(`https://site.test${path}`), context);
 
+describe('logging', () => {
+  it('logs path, status and time without IPs, keys or query values', async () => {
+    const lines = [];
+    const realLog = console.log;
+    console.log = (line) => lines.push(line);
+    try {
+      await get('/api/v1/companies/google?topic=secret-topic', { ip: '203.0.113.5' });
+      await get('/api/v1/admin', { ip: '203.0.113.5' });
+    } finally {
+      console.log = realLog;
+    }
+    const logged = lines.map((l) => JSON.parse(l));
+    assert.deepEqual(logged.map((l) => [l.path, l.status]), [['/api/v1/companies/google', 200], ['/api/v1/admin', 404]]);
+    assert.ok(logged.every((l) => l.event === 'api' && typeof l.ms === 'number'));
+    assert.doesNotMatch(lines.join('\n'), /203\.0\.113|secret/);
+  });
+});
+
 describe('method and path allow-list', () => {
   it('rejects anything but GET with 405', async () => {
     for (const method of ['POST', 'PUT', 'DELETE', 'PATCH']) {

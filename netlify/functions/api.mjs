@@ -10,7 +10,15 @@ const BROWSER_CACHE = 'public, max-age=300';
 const fail = (status, code, message, headers = {}) =>
   Response.json({ error: { code, message } }, { status, headers });
 
+// One JSON line per call that reaches the function (CDN hits never do): path and status only, no IPs or query values.
 export default async function handler(request, context) {
+  const started = Date.now();
+  const response = await handle(request, context);
+  console.log(JSON.stringify({ event: 'api', path: new URL(request.url).pathname, status: response.status, ms: Date.now() - started }));
+  return response;
+}
+
+async function handle(request, context) {
   if (request.method !== 'GET') return fail(405, 'method_not_allowed', 'only GET is allowed', { Allow: 'GET' });
 
   const url = new URL(request.url);
