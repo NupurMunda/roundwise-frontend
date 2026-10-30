@@ -18,19 +18,66 @@ export class ApiError extends Error {
   }
 }
 
+const SAVED_PREFIX = 'lurivo:';
+const MAX_SAVED_CHARS = 300_000;
+const MAX_SAVED_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+function readSaved(key) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(key));
+    return saved && Date.now() - saved.savedAt < MAX_SAVED_AGE_MS ? saved.body : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeSaved(key, body) {
+  const text = JSON.stringify({ savedAt: Date.now(), body });
+  if (text.length > MAX_SAVED_CHARS) return;
+  try {
+    localStorage.setItem(key, text);
+  } catch {
+    // storage full: drop everything we saved earlier and try once more
+    try {
+      for (const stored of Object.keys(localStorage)) if (stored.startsWith(SAVED_PREFIX)) localStorage.removeItem(stored);
+      localStorage.setItem(key, text);
+    } catch {
+      // storage unavailable: nothing is saved
+    }
+  }
+}
+
+function showSavedNotice() {
+  if ($('saved-notice')) return;
+  const note = el('p', 'note', 'Showing saved data. The service is busy or temporarily unavailable, so this may be out of date.');
+  note.id = 'saved-notice';
+  note.setAttribute('role', 'status');
+  document.querySelector('.page > main')?.before(note);
+}
+
 export async function api(path, params = {}) {
   const query = Object.entries(params)
     .filter(([, value]) => value !== undefined && value !== null && value !== '')
     .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
     .join('&');
+  const url = `/api/v1/${path}${query ? `?${query}` : ''}`;
+  const key = SAVED_PREFIX + url;
+  // When the service is down or busy, fall back to the last good copy of this exact request.
+  const failWith = (error) => {
+    const saved = error.status === 0 || error.status === 429 || error.status >= 500 ? readSaved(key) : null;
+    if (!saved) throw error;
+    showSavedNotice();
+    return saved;
+  };
   let response;
   try {
-    response = await fetch(`/api/v1/${path}${query ? `?${query}` : ''}`, { headers: { Accept: 'application/json' } });
+    response = await fetch(url, { headers: { Accept: 'application/json' } });
   } catch {
-    throw new ApiError(0, 'network');
+    return failWith(new ApiError(0, 'network'));
   }
   const body = await response.json().catch(() => null);
-  if (!response.ok) throw new ApiError(response.status, body?.error?.code ?? 'error', Number(response.headers.get('Retry-After')) || 60);
+  if (!response.ok) return failWith(new ApiError(response.status, body?.error?.code ?? 'error', Number(response.headers.get('Retry-After')) || 60));
+  writeSaved(key, body);
   return body;
 }
 
@@ -38,6 +85,7 @@ export function errorMessage(error) {
   if (error instanceof ApiError) {
     if (error.status === 429) return `Too many requests, try again in ${plural(error.retryAfter, 'second')}.`;
     if (error.status === 404) return 'Not found.';
+    if (error.status === 0 || error.status >= 500) return 'The data service is temporarily unavailable. Please try again in a few minutes.';
   }
   return 'Something went wrong. Please try again.';
 }

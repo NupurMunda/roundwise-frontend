@@ -102,6 +102,8 @@ describe('responses', () => {
       globalThis.fetch = async () => { throw error; };
       const res = await get('/api/v1/companies');
       assert.equal(res.status, 502);
+      assert.equal(res.headers.get('Retry-After'), '30');
+      assert.equal(res.headers.get('Netlify-CDN-Cache-Control'), null);
       assert.deepEqual(await res.json(), { error: { code: 'upstream_unavailable', message: 'the data service is unavailable' } });
     }
   });
@@ -124,8 +126,8 @@ describe('responses', () => {
 
   it('sets cache headers on 200 only', async () => {
     const ok = await get('/api/v1/companies');
-    assert.equal(ok.headers.get('Cache-Control'), 'public, max-age=60');
-    assert.equal(ok.headers.get('Netlify-CDN-Cache-Control'), 'public, s-maxage=3600, stale-while-revalidate=86400');
+    assert.equal(ok.headers.get('Cache-Control'), 'public, max-age=300');
+    assert.equal(ok.headers.get('Netlify-CDN-Cache-Control'), 'public, durable, s-maxage=86400, stale-while-revalidate=604800');
     reply = () => Response.json({ error: { code: 'bad_request', message: 'x' } }, { status: 400 });
     const bad = await get('/api/v1/companies?page=0');
     assert.equal(bad.status, 400);
