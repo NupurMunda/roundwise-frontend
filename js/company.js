@@ -232,7 +232,6 @@ function profileCard(profile) {
     card.append(heading, el('p', 'muted', 'No rounds summary yet.'));
     return card;
   }
-  heading.append(el('span', 'badge', `Confidence: ${profile.confidence}`));
   card.append(heading);
   if (profile.summary) card.append(el('p', null, profile.summary));
   if (profile.rounds.length) {
