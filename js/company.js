@@ -238,7 +238,8 @@ function profileCard(profile) {
     const steps = el('ol', 'steps');
     for (const round of profile.rounds) {
       const li = el('li');
-      li.append(el('strong', null, `${round.stage}: `), document.createTextNode(round.text));
+      if (round.stage) li.append(el('strong', null, `${round.stage}: `));
+      li.append(document.createTextNode(round.text));
       steps.append(li);
     }
     card.append(steps);
