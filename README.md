@@ -42,4 +42,4 @@ Tests: `npm test` (Node's built-in test runner, no dependencies).
 
 - **Netlify dashboard → Logs → Functions → `api`**: one JSON line per call that reaches the proxy: `{"event":"api","path":"/api/v1/companies/google","status":200,"ms":41}`. CDN cache hits never reach the function, so these are cache misses, which is what loads the backend. Paths and statuses only; no IPs, keys or query values are logged.
 - **Netlify dashboard → Site overview / Analytics**: page views and bandwidth (server-side analytics is a paid Netlify add-on).
-- The page itself loads no tracking script; the CSP allows only `'self'` scripts.
+- **Usage events**: the pages send three anonymous events to `/api/v1/ping`: a page view, a category opened on a company page, and a failed request (with its status code). Nothing is stored in the browser, no cookies are set, and nothing goes to a third party (the CSP still allows only `'self'`). The proxy forwards the visitor address to the backend only so it can be reduced to a daily-changing hash. Browsers that send Do Not Track send no events. Pings are never cached.

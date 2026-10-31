@@ -1,4 +1,4 @@
-import { $, api, el, errorMessage, initTheme, link, plural, showStatus } from './common.js';
+import { $, api, el, errorMessage, initTheme, link, plural, showStatus, track } from './common.js';
 
 const PAGE_SIZE = 20;
 const slug = location.pathname.split('/')[2] ?? '';
@@ -275,17 +275,21 @@ function render(company) {
   const initial = available.find((c) => c.key === location.hash.slice(1))?.key ?? available[0].key;
   const show = (key) => {
     history.replaceState(null, '', `#${key}`);
+    track({ kind: 'query', company: slug, category: key });
     PANELS[key](panel);
   };
   card.append(field('Category', options, initial, show), panel);
   root.append(card);
+  track({ kind: 'query', company: slug, category: initial });
   PANELS[initial](panel);
 }
 
 async function load() {
   showStatus(root, 'Loading…');
   try {
-    render((await api(`companies/${encodeURIComponent(slug)}`)).data);
+    const { data } = await api(`companies/${encodeURIComponent(slug)}`);
+    track({ kind: 'view', page: 'company', company: slug });
+    render(data);
   } catch (error) {
     const back = el('a', 'back', '← All companies');
     back.href = '/';

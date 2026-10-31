@@ -22,6 +22,20 @@ afterEach(() => {
 
 const get = (path, context = { ip: '198.51.100.9' }) => handler(new Request(`https://site.test${path}`), context);
 
+describe('tracking ping', () => {
+  it('forwards only the tracking params, with the visitor address and key, and is never cached', async () => {
+    const res = await get('/api/v1/ping?kind=query&company=google&category=dsa&status=503&evil=1&topic=Array', { ip: '203.0.113.5' });
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('Cache-Control'), 'no-store');
+    assert.equal(res.headers.get('Netlify-CDN-Cache-Control'), null);
+    const url = new URL(calls[0].url);
+    assert.equal(url.pathname, '/v1/ping');
+    assert.deepEqual([...url.searchParams.keys()].sort(), ['category', 'company', 'kind', 'status', 'topic']);
+    assert.equal(calls[0].init.headers['x-client-ip'], '203.0.113.5');
+    assert.equal(calls[0].init.headers['x-api-key'], 'secret-key');
+  });
+});
+
 describe('logging', () => {
   it('logs path, status and time without IPs, keys or query values', async () => {
     const lines = [];

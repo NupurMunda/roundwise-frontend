@@ -1,4 +1,4 @@
-import { $, REDUCED_MOTION, api, el, errorMessage, initTheme, plural, showStatus } from './common.js';
+import { $, REDUCED_MOTION, api, el, errorMessage, initTheme, plural, showStatus, track } from './common.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const PAGE_SIZE = 50;
@@ -309,4 +309,5 @@ async function load() {
 }
 
 initTheme();
+track({ kind: 'view', page: 'home' });
 load();

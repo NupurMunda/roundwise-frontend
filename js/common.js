@@ -55,6 +55,13 @@ function showSavedNotice() {
   document.querySelector('.page > main')?.before(note);
 }
 
+// Tells the backend what a visitor did (page viewed, category opened, request failed) so we can see usage.
+// Anonymous: no cookies, nothing stored in the browser, and the backend keeps only a daily-changing hash.
+export function track(fields) {
+  if (globalThis.navigator?.doNotTrack === '1') return;
+  fetch(`/api/v1/ping?${new URLSearchParams(fields)}`, { keepalive: true }).catch(() => {});
+}
+
 export async function api(path, params = {}) {
   const query = Object.entries(params)
     .filter(([, value]) => value !== undefined && value !== null && value !== '')
@@ -64,6 +71,7 @@ export async function api(path, params = {}) {
   const key = SAVED_PREFIX + url;
   // When the service is down or busy, fall back to the last good copy of this exact request.
   const failWith = (error) => {
+    track({ kind: 'error', status: error.status });
     const saved = error.status === 0 || error.status === 429 || error.status >= 500 ? readSaved(key) : null;
     if (!saved) throw error;
     showSavedNotice();

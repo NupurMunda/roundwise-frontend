@@ -1,4 +1,4 @@
-import { $, api, el, errorMessage, initTheme, link, showStatus } from './common.js';
+import { $, api, el, errorMessage, initTheme, link, showStatus, track } from './common.js';
 
 const root = $('sources');
 
@@ -38,4 +38,5 @@ async function load() {
 }
 
 initTheme();
+track({ kind: 'view', page: 'sources' });
 load();

@@ -1,5 +1,5 @@
-const ALLOWED_PATH = /^\/api\/v1\/(health|graph|companies|companies\/[a-z0-9-]+(\/(dsa|hld|ai|behavioral))?|resources\/[0-9]+|sources)$/;
-const FORWARDED_PARAMS = ['q', 'page', 'limit', 'time_window', 'difficulty', 'topic'];
+const ALLOWED_PATH = /^\/api\/v1\/(health|graph|companies|companies\/[a-z0-9-]+(\/(dsa|hld|ai|behavioral))?|resources\/[0-9]+|sources|ping)$/;
+const FORWARDED_PARAMS = ['q', 'page', 'limit', 'time_window', 'difficulty', 'topic', 'kind', 'company', 'category', 'status'];
 const TIMEOUT_MS = 8000;
 
 // Data changes rarely: keep it a day in the shared CDN cache (durable = one copy across edge nodes) and
@@ -43,7 +43,9 @@ async function handle(request, context) {
   }
 
   const out = {};
-  if (response.status === 200) {
+  if (url.pathname === '/api/v1/ping') {
+    out['Cache-Control'] = 'no-store'; // every visit must reach the backend to be counted
+  } else if (response.status === 200) {
     out['Cache-Control'] = BROWSER_CACHE;
     out['Netlify-CDN-Cache-Control'] = CDN_CACHE;
   }

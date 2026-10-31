@@ -83,3 +83,31 @@ describe('error messages', () => {
 });
 
 globalThis.fetch ??= realFetch;
+
+describe('tracking', () => {
+  it('sends anonymous events, and reports failed requests', async () => {
+    const { track } = await import('../js/common.js');
+    const urls = [];
+    globalThis.fetch = async (url) => { urls.push(String(url)); return reply(); };
+    track({ kind: 'query', company: 'google', category: 'dsa' });
+    assert.deepEqual(urls, ['/api/v1/ping?kind=query&company=google&category=dsa']);
+
+    urls.length = 0;
+    reply = down(503);
+    await assert.rejects(api('companies'));
+    assert.ok(urls.some((u) => u === '/api/v1/ping?kind=error&status=503'));
+  });
+
+  it('sends nothing when the browser asks not to be tracked', async () => {
+    const { track } = await import('../js/common.js');
+    const urls = [];
+    globalThis.fetch = async (url) => { urls.push(String(url)); return reply(); };
+    Object.defineProperty(globalThis, 'navigator', { value: { doNotTrack: '1' }, configurable: true });
+    try {
+      track({ kind: 'view', page: 'home' });
+    } finally {
+      delete globalThis.navigator;
+    }
+    assert.deepEqual(urls, []);
+  });
+});
